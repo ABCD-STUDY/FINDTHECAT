@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+  <head>
+    <link href="js/jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+  </head>
+  <body>
+
+
+  </body>
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script src="js/jspsych/jspsych.js"></script>
+  <script src="js/jspsych/plugins/jspsych-text.js"></script>
+  <script src="js/jspsych/plugins/jspsych-single-stim.js"></script>
+  <script>
+    function getAverageResponseTime() {
+
+	var trials = jsPsych.data.getTrialsOfType('single-stim');
+
+	var sum_rt = 0;
+	var valid_trial_count = 0;
+	for (var i = 0; i < trials.length; i++) {
+	    if (trials[i].response == 'go' && trials[i].rt > -1) {
+		sum_rt += trials[i].rt;
+		valid_trial_count++;
+	    }
+	}
+	return Math.floor(sum_rt / valid_trial_count);
+    }
+
+
+
+    jQuery("document").ready(function() {
+	var experiment = [];
+
+	var post_trial_gap = function() {
+	    return Math.floor( Math.random() * 1500 ) + 750;
+	}
+	
+	var welcome_block = {
+	    type: "text",
+	    text: "Welcome to \"Find the Cat\". Press any key to begin."
+	};
+
+	var instructions_block = {
+	    type: "text",
+	    text: "<p>In this experiment, an animal will appear in the center " +
+		"of the screen.</p><p>If the animal is a <strong>cat</strong>, " +
+		"press the letter F on the keyboard as fast as you can.</p>" +
+		"<p>If the animal is a <strong>dog</strong>, do not press " +
+		"any key.</p>" +
+		"<div class='left center-content'><img src='img/cat.jpg' style=\"width: 40%;\"></img>" +
+		"<p class='small'><strong>Press the F key</strong></p></div>" +
+		"<div class='right center-content'><img src='img/dog.jpg' style=\"width: 40%\"></img>" +
+		"<p class='small'><strong>Do not press a key</strong></p></div>" +
+		"<p>Press any key to begin.</p>",
+	    timing_post_trial: 2000
+	};
+	var debrief_block = {
+	    type: "text",
+	    text: function() {
+		return "<p>Your average response time was <strong>" +
+		    getAverageResponseTime() + "ms</strong>. Press " +
+		    "any key to complete the experiment. Thank you!</p>";
+	    }
+	};
+
+
+	var test_stimuli = [ { image: 'img/dog.jpg', data: { response: 'no-go' } }, { image: 'img/cat.jpg', data: { response: 'go' } } ];
+        var all_trials = jsPsych.randomization.repeat(test_stimuli, 10, true);
+	var block = {
+	    type: 'single-stim',
+	    stimuli: all_trials.image,
+	    choices: ['F'],
+	    data: all_trials.data,
+	    timing_response: 1500,
+	    timing_post_trial: post_trial_gap
+	};
+	experiment.push(welcome_block);
+	experiment.push(instructions_block);
+	experiment.push(block);
+	experiment.push(debrief_block);
+
+	jsPsych.init({
+	    experiment_structure: experiment,
+	    on_finish: function() {
+		jsPsych.data.displayData();
+	    }
+	});
+    });
+  </script>
+</html>
