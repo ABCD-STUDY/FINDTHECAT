@@ -8,4 +8,5 @@ Based on example tutorials provided by jsPsych (http://www.jspsych.org/) this pr
  * index.html response time task
  * index2.html response time task with fixation cross
  * index3.html attention task (flanker)
+ * index4.html little man task
  
