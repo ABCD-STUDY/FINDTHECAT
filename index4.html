@@ -1,0 +1,178 @@
+<!doctype html>
+<html>
+
+  <head>
+    <title>My experiment</title>
+    <!-- Load jQuery -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <!-- Load the jspsych library and plugins -->
+    <script src="js/jspsych/jspsych.js"></script>
+    <script src="js/jspsych/plugins/jspsych-text.js"></script>
+    <script src="js/jspsych/plugins/jspsych-single-stim.js"></script>
+    <!-- Load the stylesheet -->
+    <!-- <link href="experiment.css" type="text/css" rel="stylesheet"></link> -->
+    <link href="js/jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+
+  </head>
+
+  <body>
+    <div id="jspsych_target"></div>
+  </body>
+
+  <script>
+    // Experiment parameters
+    var n_trials_EX = 4;
+    var n_trials = 20;
+
+    var stimuli=["img/1.png", "img/2.png", "img/3.png", "img/4.png", 
+    		"img/5.png", "img/6.png", "img/7.png", "img/8.png", 
+		"img/9.png", "img/10.png", "img/11.png", "img/12.png", 
+		"img/13.png", "img/14.png", "img/15.png", "img/16.png", 
+		"img/17.png", "img/18.png", "img/19.png", "img/20.png",
+		"img/21.png", "img/22.png", "img/23.png", "img/24.png",
+		"img/25.png", "img/26.png", "img/27.png", "img/28.png", 
+		"img/29.png", "img/30.png", "img/31.png", "img/32.png", 
+		];
+
+    var stimuli_types = ["left","right","left","right","right","left",
+    			"right","left","right","right","left","left",
+			"right","left","left","right","right","left",
+			"left","right","left","right","right","left",
+			"left","right","right","right","left","left",
+			"right","left",
+			];
+
+
+    // Example slides
+    var stimuli_EX =["img/EX 1.png", "img/EX 2.png", "img/EX 3.png", "img/EX 4.png"];
+
+    var stimuli_types_EX = ["left", "left", "right", "right"];
+
+    // Experiment Instructions
+    var welcome_message = "<div id='instructions'><p>Welcome to the " +
+	"experiment. Press enter to begin.</p></div>";
+
+    var instructions = "<div id='instructions'><p>Now you will begin " +
+    	"the actual program.</p><p>Press enter to start.</p>";
+
+    var instructions_EX = "<div id='instructions'><p>You will see a " +
+	"series of images that look similar to this:</p><p>" +
+	"<img src='img/1.png'></p><p>Press the arrow " +
+	"key that corresponds to which hand the little man is holding " +
+	"his briefcase in. For example, in this case you would press " +
+	"the left arrow key.</p><p>The first four images are practice " + 
+	"Press enter to start.</p>";
+
+    var debrief = "<div id='instructions'><p>Thank you for " +
+	  "participating! Press enter to see the data.</p></div>";
+
+    // Generating Order for 4 Stimuli examples
+    // Examples (EX) are not randomized
+    var stimuli_order_EX = [];
+    var opt_data_EX = [];
+
+    for (var i = 0; i < n_trials_EX; i++) {
+	  stimuli_order_EX.push(stimuli_EX[i]);
+	  opt_data_EX.push({
+		  "stimulus_type": stimuli_types_EX[i]
+	  });
+    }
+
+    // Generating Random Order for Stimuli (full test)
+    var stimuli_random_order = [];
+    var opt_data = [];
+
+    for (var i = 0; i < n_trials; i++) {
+	  var random_choice = Math.floor(Math.random() * stimuli.length);
+
+	  stimuli_random_order.push(stimuli[random_choice]);
+	  opt_data.push({
+		  "stimulus_type": stimuli_types[random_choice]
+	  });
+    }
+
+    // Define experiment blocks
+    var instruction_block = {
+	  type: "text",
+	  text: [welcome_message, instructions_EX],
+	  timing_post_trial: 2500,
+	  //adding ignore label for welcome and instruction messages
+	  on_finish: function(data){
+	   	 jsPsych.data.addDataToLastTrial({ignore: true});
+	  },
+    };
+
+    var EX_block = {
+	  type: "single-stim",
+	  stimuli: stimuli_order_EX,
+	  choices: [37, 39],
+	  data: opt_data_EX,
+	  //added a function to record correct or not
+	  on_finish: function(data){
+	  	//label data as example
+		jsPsych.data.addDataToLastTrial({ignore: true});
+		//labal data as correct or not.
+	    	var correct = false;
+	   	if(data.stimulus_type == 'left' && data.key_press == 37){
+	      		correct = true;
+	   	} else if(data.stimulus_type == 'right' && data.key_press == 39){
+	      		correct = true;
+	  	}
+	   	jsPsych.data.addDataToLastTrial({correct: correct});
+	  },
+          
+    };
+
+    var second_instruction_block = { 
+	  type: "text",
+	  text: [instructions],
+	  timing_post_trial: 2500,
+	  //adding ignore label for welcome and instruction messages
+	  on_finish: function(data){
+	   	 jsPsych.data.addDataToLastTrial({ignore: true});
+	  },
+    };
+
+    var test_block = {
+ 	  type: "single-stim",
+	  stimuli: stimuli_random_order,
+	  choices: [37, 39],
+	  data: opt_data,
+
+	  //added a function to record correct or not
+	  on_finish: function(data){
+	  	//label data as correct or incorrect
+	    	var correct = false;
+	   	if(data.stimulus_type == 'left' && data.key_press == 37){
+	      		correct = true;
+	   	} else if(data.stimulus_type == 'right' && data.key_press == 39){
+	      		correct = true;
+	  	}
+	   	jsPsych.data.addDataToLastTrial({correct: correct});
+	  	},
+    };
+
+    var debrief_block = {
+	  type: "text",
+	  text: [debrief],
+	  //adding ignore label for welcome and instruction messages
+	  on_finish: function(data){
+	   	 jsPsych.data.addDataToLastTrial({ignore: true});
+	  },
+    };
+
+    jsPsych.init({
+	  display_element: $('#jspsych_target'),
+	  //order of experiment includes an example section
+	  experiment_structure: [instruction_block, EX_block, 
+	  			 second_instruction_block,
+	  			 test_block, debrief_block],
+
+	  on_finish: function(data) {
+	      	//call from tutorial displays JSON string as final page
+   		jsPsych.data.displayData();
+	  }
+    });
+</script>
+</html>
+    
